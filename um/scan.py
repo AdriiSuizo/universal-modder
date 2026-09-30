@@ -95,7 +95,7 @@ def steam_games() -> list[dict]:
         libs.append(root)
         lf = root / "steamapps" / "libraryfolders.vdf"
         if lf.exists():
-            data = _vdf(lf.read_text(errors="replace"))
+            data = _vdf(lf.read_text(encoding="utf-8", errors="replace"))
             for v in (data.get("libraryfolders") or {}).values():
                 if isinstance(v, dict) and v.get("path"):
                     libs.append(Path(to_posix(v["path"])))
@@ -106,7 +106,7 @@ def steam_games() -> list[dict]:
             continue
         seen.add(apps.resolve())
         for acf in apps.glob("appmanifest_*.acf"):
-            st = _vdf(acf.read_text(errors="replace")).get("AppState", {})
+            st = _vdf(acf.read_text(encoding="utf-8", errors="replace")).get("AppState", {})
             path = apps / "common" / st.get("installdir", "")
             if st.get("installdir") and path.is_dir():
                 games.append(dict(store="steam", appid=st.get("appid"), name=st.get("name"), path=str(path),

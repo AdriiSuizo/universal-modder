@@ -84,6 +84,42 @@ def test_vdf():
     assert d["AppState"]["installdir"] == "Terraria"
 
 
+@pytest.mark.parametrize("library_name,install_name,game_name", [
+    ("SteamLibrary", "ExampleGame", "Example Game"),
+    ("SteamLibrary", "ExampleGame", "Example Game\u2122"),
+    ("SteamLibrary", "Jeu\u00e9", "Example Game"),
+    ("Biblioth\u00e8que", "ExampleGame", "Example Game"),
+])
+def test_steam_games_utf8(tmp_path, monkeypatch, library_name, install_name, game_name):
+    root = tmp_path / "Steam"
+    library = tmp_path / library_name
+    apps = library / "steamapps"
+    game_path = apps / "common" / install_name
+    game_path.mkdir(parents=True)
+    (root / "steamapps").mkdir(parents=True)
+    (root / "steamapps/libraryfolders.vdf").write_text(
+        '"libraryfolders" { "0" { "path" "' + library.as_posix() + '" } }', encoding="utf-8",
+    )
+    (apps / "appmanifest_123.acf").write_text(
+        f'"AppState" {{ "appid" "123" "name" "{game_name}" "installdir" "{install_name}" }}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(scan, "steam_roots", lambda: [root])
+
+    # Emulate a non-UTF-8 Windows default on every test platform, using real files.
+    original_read_text = Path.read_text
+
+    def read_text(path, encoding=None, errors=None, **kwargs):
+        return original_read_text(path, encoding=encoding or "cp1252", errors=errors, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+
+    assert scan.steam_games() == [{
+        "store": "steam", "appid": "123", "name": game_name,
+        "path": str(game_path), "workshop": None,
+    }]
+
+
 # --------------------------------------------------------------------------- sprite
 
 def sprite_on_white(w=64, h=48):
