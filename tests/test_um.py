@@ -209,3 +209,51 @@ def test_compile_small_edl(tmp_path):
     video.compile_edl(tmp_path / "edl.json", str(tmp_path / "out.mp4"))
     info = video.probe(tmp_path / "out.mp4")
     assert abs(info["duration"] - (2 + 2 + 1.5)) < 0.15 and info["audio"]
+
+
+# --------------------------------------------------------------------------- knowledge base
+
+from um import kb  # noqa: E402
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def test_repo_knowledge_is_valid():
+    root = REPO / "knowledge"
+    for p, _, _ in kb.notes(root):
+        fails, _ = kb.check_note(p, root)
+        assert not fails, (p, fails)
+    idx, rows = kb.build_index(root)
+    assert (root / "INDEX.md").read_text() == idx, "run `um kb index`"
+    assert len(rows) >= 7
+
+
+def test_kb_new_check_search(tmp_path):
+    import shutil
+    root = tmp_path / "knowledge"
+    root.mkdir()
+    shutil.copy(REPO / "knowledge" / "TEMPLATE.md", root / "TEMPLATE.md")
+    p = kb.new_note(root, "Hades II", "A new boon god", agent="Codex (gpt-6)", route="loader-api")
+    fails, _ = kb.check_note(p, root)
+    assert any("unfilled template text" in f for f in fails)          # a fresh scaffold must not pass
+    good = p.read_text()
+    good = good.replace("FILL IN: exact build", "1.0.1 (Steam)").replace("anti_cheat: FILL IN", "anti_cheat: none")
+    good = good.replace("> Two to four sentences: what you built", "> Added a boon god via a Lua mod loader")
+    good = good.replace("The most valuable section. Numbered; each one symptom → cause → fix.", "")
+    good = good.replace("1. **Symptom.** What you saw. **Cause:** what it really was. **Fix:** what worked.",
+                        "1. **Boons never offered.** **Cause:** pool cached at load. **Fix:** register before the run starts.")
+    p.write_text(good)
+    fails, _ = kb.check_note(p, root)
+    assert not fails, fails
+    res = kb.search(root, ["boon"])
+    assert res and res[0]["path"].endswith("a-new-boon-god.md")
+    assert kb.search(root, ["boon"], route="native-hook") == []
+
+
+def test_kb_check_rejects_secrets_and_dumps(tmp_path):
+    note = tmp_path / "n.md"
+    code = "\n".join(f"int x{i} = {i};" for i in range(160))
+    note.write_text("---\nkind: technique\ntitle: t\ntags: [x]\ndate: 2026-09-30\nagents: [a]\n---\n# t\n"
+                    f"```c\n{code}\n```\n" + "FAL" + "_KEY=abcdefghijklmnopqrstuvwxyz0123\n")
+    fails, _ = kb.check_note(note)
+    assert any("code block" in f for f in fails) and any("FAL_KEY" in f for f in fails)

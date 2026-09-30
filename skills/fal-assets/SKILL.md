@@ -13,11 +13,19 @@ boss music, a voiced line.
 - **Key.** `FAL_KEY` must be set (create one at https://fal.ai/dashboard/keys). `um fal` also reads it from
   a `.env` file (`FAL_KEY=...`) in the working folder. Never write the key into mod files; `um publish check`
   flags leaked keys.
-- **MCP.** This plugin registers fal's hosted MCP server (`https://mcp.fal.ai/mcp`, `Authorization: Bearer
-  ${FAL_KEY}`). Without the plugin:
-  ```bash
-  claude mcp add --transport http fal-ai https://mcp.fal.ai/mcp --header "Authorization: Bearer $FAL_KEY"
-  ```
+- **MCP.** fal's hosted MCP server is `https://mcp.fal.ai/mcp` with header `Authorization: Bearer $FAL_KEY`.
+  The repo pre-configures it for each agent:
+  - Claude Code: `.mcp.json`
+  - Codex: `.codex/config.toml`
+  - Cursor: `.cursor/mcp.json`
+  - VS Code/Copilot: `.vscode/mcp.json`
+  - Gemini CLI: `gemini-extension.json`
+
+  To add it by hand:
+  - Claude Code: `claude mcp add --transport http fal https://mcp.fal.ai/mcp --header "Authorization: Bearer $FAL_KEY"`
+  - Codex (`~/.codex/config.toml`): `[mcp_servers.fal]` with `url = "https://mcp.fal.ai/mcp"` and
+    `bearer_token_env_var = "FAL_KEY"`
+  - anything else: point its MCP config at the URL and header above.
   MCP tools: `search_models`, `recommend_model`, `get_model_schema`, `get_pricing`, `run_model`,
   `submit_job`/`check_job`/`get_job_result`, `upload_file`, `search_docs`.
 - **CLI alternatives:** `pip install fal` gives `fal api <endpoint> key=value key:=json`; the genmedia CLI

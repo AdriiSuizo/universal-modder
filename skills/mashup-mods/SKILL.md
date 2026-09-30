@@ -46,6 +46,25 @@ Bridge-plugin template in public: chasm-bridge-fnv (thin xNVSE plugin, file-drop
 data-driven actions). The Terraria agent bridge in `examples/terraria-tmodloader/reference/` is the same
 idea.
 
+### Worked example: real Minecraft inside GTA V
+Code: `examples/minecraft-gta5-passthrough`. Every lesson: `knowledge/games/gta-v/minecraft-passthrough.md`.
+- **Minecraft (Fabric mod):** it takes camera, ground and input from the host over a WebSocket on
+  `127.0.0.1`. Each frame it writes world colour + depth and a separate hand/HUD overlay into named shared
+  memory.
+- **GTA (ScriptHookV ASI + ReShade add-on):**
+  - it sends GTA's camera and the ground under the player (as barrier blocks);
+  - it composites Minecraft's colour against GTA's reversed-Z depth in a shader;
+  - it turns Minecraft explosions, arrows and firework hits into GTA explosions and bullets.
+- **Mapping:** 1 metre = 1 block. GTA (x, y, z) → MC (x, z + offset, −y); yaw = 180 − heading;
+  pitch = −pitch.
+- **Latency:** Minecraft's frame is re-projected onto GTA's camera, rotation then full 6-DoF with depth.
+  Measure the pose lag with a scene where one side draws something the other doesn't (a gold wall vs the
+  skyline).
+- **Built without the game:** most of it was built before the host game was even installed, against a
+  fake host (known geometry) and a fake D3D11 "GTA" that runs the real compositor.
+- **What didn't work:** putting host-game guns in Steve's hands (the aim cam and animations don't fit).
+  Guest weapons with host effects did.
+
 ## Pattern 3: embed a decomp as a library
 libsm64 turns the Super Mario 64 decomp into a library: feed it collision and input, and it returns Mario's
 state and mesh. G64 embeds it in Garry's Mod; the host feeds its collision into the guest sim. Any

@@ -12,7 +12,7 @@
 //   full-size staging texture per call (~3.7 MB a frame; one take grew the process to 17 GB).
 // - Audio: FAudio on Windows talks to WASAPI directly (SDL_AUDIODRIVER=disk changes nothing), so the
 //   game's own sound comes from a WASAPI process-loopback capture of this process
-//   (universal-modder/tools/win/ProcLoopback.ps1): the game only, nothing else playing on the PC.
+//   (universal-modder/um/ps1/ProcLoopback.ps1): the game only, nothing else playing on the PC.
 // - Stopping: send ffmpeg a raw 'q' and wait for it OFF the main thread. gfxcapture only delivers a
 //   frame when the window redraws, so a game blocked in WaitForExit stalls ffmpeg before it ever
 //   reads the q, and the end of the take is lost to the kill that follows.
@@ -45,7 +45,7 @@ namespace YourMod
 
 		/// <summary>Records this game's window (and its own sound) to <paramref name="mkvPath"/>.</summary>
 		/// <param name="ffmpegExe">a Windows ffmpeg with the gfxcapture filter (`um win setup` fetches one)</param>
-		/// <param name="procLoopbackPs1">tools/win/ProcLoopback.ps1, or null for video only</param>
+		/// <param name="procLoopbackPs1">um/ps1/ProcLoopback.ps1, or null for video only</param>
 		/// <param name="logger">e.g. your Mod.Logger</param>
 		public static void Start(string mkvPath, string ffmpegExe, string procLoopbackPs1, ILog logger)
 		{

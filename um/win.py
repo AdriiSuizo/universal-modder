@@ -5,7 +5,7 @@
     um win kill <pid>                             # by exact PID only (never by pattern)
     um win launch --steam 105600 [-- args]        # or: um win launch "C:\\Games\\Foo\\foo.exe" -- -windowed
     um win shot --exe AoE2DE_s.exe out.png [--scale 0.33]    # one frame of the game window (GPU-safe capture)
-    um win drive --proc AoE2DE_s "focus" "click 640 360" "key 0x1B"   # input (WinDrive protocol, see tools/win)
+    um win drive --proc AoE2DE_s "focus" "click 640 360" "key 0x1B"   # input (WinDrive protocol, see um/ps1)
     um win record --exe Game.exe --out C:\\caps\\take1 --seconds 30  # video (gfxcapture) + game-only audio
     um video mux C:\\caps\\take1.mkv C:\\caps\\take1.audio.raw C:\\caps\\take1.json out.mp4
     um win reg get "HKCU\\Software\\Foo" [value] | um win reg set KEY VALUE DATA [--type REG_DWORD]
@@ -34,7 +34,7 @@ from pathlib import Path
 from um.common import die, is_windows, is_wsl, to_posix, to_win
 
 HERE = Path(__file__).resolve().parent
-TOOLS = HERE.parent / "tools" / "win"
+TOOLS = HERE / "ps1"          # shipped inside the package so `uv tool install` gets them too
 FFMPEG_URL = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
 
 
@@ -69,7 +69,7 @@ def local_appdata() -> Path:
 
 
 def tool_path(name: str) -> str:
-    """Copy tools/win/<name> to %LOCALAPPDATA% (PowerShell won't run scripts from \\\\wsl$ reliably); Windows path."""
+    """Copy um/ps1/<name> to %LOCALAPPDATA% (PowerShell won't run scripts from \\\\wsl$ reliably); Windows path."""
     src = TOOLS / name
     dst = local_appdata() / "tools" / name
     dst.parent.mkdir(parents=True, exist_ok=True)

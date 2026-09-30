@@ -34,6 +34,18 @@ reinvent it. Check each one's GitHub/Nexus page for the version matching the gam
   Loader.
 - **Assets:** OpenIV (with an `mods/` folder copy of RPFs; never edit originals), and CodeWalker for maps.
 - LSPDFR-style frameworks exist for specific genres.
+- **From the Minecraft × GTA V project** (`knowledge/games/gta-v/minecraft-passthrough.md`):
+  - **Launch:** launch story mode with BattlEye off (`-nobattleye` in `args.txt`, or the launcher's toggle).
+    That also keeps Online from starting.
+  - **ReShade:** it has to load through the ASI loader. GTA loads the system `dxgi.dll` ahead of a proxy in
+    its folder.
+  - **Downloads:** dev-c.com (ScriptHookV) rejects scripted downloads without browser headers.
+  - **Script lifecycle:**
+    - the pause menu stops ScriptHookV scripts;
+    - the idle cinematic camera starts after about 30 s (call `INVALIDATE_IDLE_CAM` every frame);
+    - explosion camera shake isn't reported by `IS_GAMEPLAY_CAM_SHAKING`.
+  - **Camera timing:** a script reads the camera for the frame being prepared, one frame ahead of what's on
+    screen.
 
 ## CD Projekt REDengine
 - **Cyberpunk 2077:**

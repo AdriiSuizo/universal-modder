@@ -27,7 +27,7 @@ um video mux C:/caps/take1.mkv C:/caps/take1.audio.raw C:/caps/take1.json take1.
 - **Video:** ffmpeg gfxcapture of that window only (GPU frames, no desktop). It encodes with NVENC, AMF or
   QSV when available. NVENC H.264 maxes out at **4096 px wide**, so the recorder scales above that; for
   32:9 screens, crop to the centre 16:9 with `--crop`.
-- **Audio:** WASAPI **process loopback** of the game's PID (`tools/win/ProcLoopback.ps1`). Only the game is
+- **Audio:** WASAPI **process loopback** of the game's PID (`um/ps1/ProcLoopback.ps1`). Only the game is
   recorded; no Spotify, no notifications. It's timestamped so the file position is wall time. Muxing uses
   the recorded offset. Fine-tune with a visual/audio sync event (a flash vs its boom) and pass `--offset`.
 - **Inside a mod (optional):** start and stop recording from the mod for frame-exact takes. Never block the

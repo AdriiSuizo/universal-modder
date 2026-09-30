@@ -23,6 +23,16 @@ resource packs. Develop in `com.mojang/development_*_packs` and turn on content-
 
 ## Pitfalls
 - Match the exact game version + loader version + API version triple; mods are version-locked.
+- **Minecraft 26.3 facts from the GTA passthrough project** (`knowledge/games/gta-v/minecraft-passthrough.md`):
+  - A depth readback (`copyTextureToBuffer`) leaves the read buffer at `GL_NONE`, so later colour readbacks
+    fail. Restore it in a mixin.
+  - Fabric's `JOIN` event fires before the player is in the player list; delay setup commands by ~10 ticks.
+  - An entity's Invisible flag resets on first sync unless it has an effect.
+  - Invulnerable entities can't be targeted by mobs.
+  - With `noPhysics`, `onGround` sticks, so elytra glides get cancelled.
+- **A separate launcher profile keeps the user's worlds safe.** Add a Fabric profile with its own `gameDir`.
+  `fabric-installer -launcher microsoft_store` fails for lack of `launcher_profiles_microsoft_store.json`,
+  so edit `launcher_profiles.json` by hand, after a backup.
 - Multiplayer: a server needs the mod too (or use plugins). Never ship client hacks for public servers.
 - Mashups: the September 2026 "Minecraft inside X" projects either reimplemented Minecraft (Rust rewrites
   matching Java worldgen) or ran it side by side and exchanged state (passthrough). Minecraft's own assets

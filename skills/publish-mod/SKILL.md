@@ -37,7 +37,7 @@ is the platform's norm.
   - the loader and libraries;
   - references you learned from;
   - **"Art/audio generated with fal (fal.ai) using <models>"** (`fal_manifest.jsonl` lists them);
-  - honest AI disclosure ("built with Claude Code").
+  - honest AI disclosure (which agent and model built it).
 - License for your code (MIT/Apache is common). Your assets' terms follow the models' licenses.
 
 ## 4. Version and changelog
@@ -46,6 +46,6 @@ updates, re-run the in-game test scene before bumping.
 
 ## 5. The post
 - Lead with the video: the showcase-video skill; 20-45 s, gameplay within 2-3 s.
-- Post text: the hook, what it is, the "how" credit (built with Claude Code + fal), a link.
+- Post text: the hook, what it is, the "how" credit (which agent + fal built it), a link.
 - If the video uses anyone else's footage, credit them by handle and ask first.
 - Publishing is always the user's call. Draft it, show them, and let them press the button.

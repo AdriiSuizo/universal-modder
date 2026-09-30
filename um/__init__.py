@@ -1,4 +1,4 @@
-"""universal-modder: tools an AI agent uses to mod games.
+"""universal-modder: tools any AI agent (Claude Code, Codex, Cursor, Gemini CLI, ...) uses to mod games.
 
 Subcommands (see `um --help`):
   scan      find installed games and fingerprint one: engine, runtime, anti-cheat, mod loaders, routes
@@ -9,6 +9,7 @@ Subcommands (see `um --help`):
   win       Windows (and WSL): screenshots, recording with game-only audio, input, processes
   backup    snapshot and restore save folders before you touch them
   publish   lint a mod folder before sharing: game files, decompiled code, secrets, credits
+  kb        the knowledge base: search prior field notes, write your own, check it, open a PR
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

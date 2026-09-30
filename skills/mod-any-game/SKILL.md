@@ -6,16 +6,22 @@ description: Mod a PC game the user owns, taking an idea to working in the real 
 # Mod any game
 
 You are the modder. The user names a game and an idea, and you take it all the way to working in the real
-game, on video. The method below shipped two mods, each in about a day: a Terraria mod (homing missiles, a
-tactical nuke, new enemies, a boss) and a new Age of Empires II civilization with 3D-rendered units. It also
-folds in what the September 2026 wave of AI mashup mods (Minecraft in Elden Ring, skateboarding in MW2) showed
-about scaling up. Case studies: `references/case-studies.md`. Code: `examples/`.
+game, on video. The method below shipped three projects:
+- a Terraria mod (homing missiles, a tactical nuke, new enemies, a boss);
+- a new Age of Empires II civilization with 3D-rendered units;
+- real Minecraft composited into GTA V.
+
+It also folds in what the September 2026 wave of AI mashup mods (Minecraft in Elden Ring, skateboarding in
+MW2) showed about scaling up.
+- Case studies: `references/case-studies.md`.
+- Code: `examples/`.
+- Everything other agents have written down: the knowledge base (`knowledge/` in the repo, `um kb search`).
 
 ## Your tools
 
-`um` is the toolkit CLI. The plugin's session hook puts it on PATH. If `um` isn't found, run it as
-`${CLAUDE_PLUGIN_ROOT}/bin/um`, or `bin/um` inside a clone of universal-modder. The first run sets up its
-Python env through `uv`. Every group has `--help` with examples.
+`um` is the toolkit CLI. Plugin installs and clones put it on PATH (it lives at `bin/um` in the repo).
+Otherwise install it once for any agent: `uv tool install git+https://github.com/rehan-remade/universal-modder`
+(or `pipx install ...`). Every group has `--help` with examples.
 
 | Need | Command |
 |---|---|
@@ -28,7 +34,7 @@ Python env through `uv`. Every group has `--help` with examples.
 | Lint a mod before sharing (game files, decompiled code, secrets) | `um publish check` |
 
 Companion skills: **game-recon**, **reverse-engineering**, **fal-assets**, **asset-pipeline**,
-**game-automation**, **showcase-video**, **mashup-mods**, **publish-mod**.
+**game-automation**, **showcase-video**, **mashup-mods**, **publish-mod**, **share-field-notes**.
 
 ## The loop
 
@@ -42,6 +48,10 @@ Companion skills: **game-recon**, **reverse-engineering**, **fal-assets**, **ass
   failed and why, and the next step. Anything not in the journal is lost at the next context compaction.
 
 ### 1. Recon (the game-recon skill does this in depth)
+- **Search the knowledge base first.** Run `um kb search "<game>"` and `um kb search "<engine>"`. If
+  another agent left a field note, start from its exact versions, route and gotchas, and don't repeat its
+  dead ends. Without `um`, read
+  https://github.com/rehan-remade/universal-modder/blob/main/knowledge/INDEX.md.
 - Run `um scan "<game>"`. It reports the engine and version, whether code is managed or native, anti-cheat,
   mod loaders already installed, save folders, ranked routes, and which playbook in
   `references/engines/` to read. Read that playbook.
@@ -127,6 +137,17 @@ Choose moments from a contact sheet, then cut 20-45 s with one-line titles and a
 Run `um publish check <mod> --game "<install>"`. Write a README with install steps. Credit tools, loaders and
 fal-generated assets, and be honest that it was built with AI. Ship no game files.
 
+### 10. Leave a field note (the share-field-notes skill)
+Turn `MODLOG.md` into a knowledge-base note (`um kb new ...`, then `um kb check`). Cover:
+- exact versions;
+- the route;
+- what the engine really does;
+- how you verified it;
+- numbered gotchas.
+
+With your human's OK, open a PR (`um kb pr <note> --yes`). Do this even if the mod isn't finished: a
+documented dead end saves the next agent hours.
+
 ## Hard rules
 - **Ownership.** Only mod games the user owns.
 - **Online play.** Stay in single-player/offline, or on servers the user controls. Never touch the client of
@@ -157,5 +178,7 @@ fal-generated assets, and be honest that it was built with AI. Ship no game file
     `big-frameworks.md` (RE Engine, FromSoft, GTA, Cyberpunk, BG3), `misc-engines.md` (GameMaker, RPG Maker,
     Ren'Py, Paradox, Doom, HTML5, LÖVE, Java);
   - single games and retro: `minecraft.md`, `genie-aoe2.md`, `retro-decomp.md`.
-- `references/case-studies.md`: Terraria and AoE2 end to end, every non-obvious fact.
+- `references/case-studies.md`: Terraria, AoE2 and Minecraft × GTA V end to end, every non-obvious fact.
+- The knowledge base (`knowledge/` at the repo root; `um kb search`): field notes by many agents, per game
+  and per technique.
 - `references/safety.md`: the rules with their reasons, anti-cheat and legal hygiene.

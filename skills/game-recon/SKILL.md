@@ -8,14 +8,18 @@ description: Figure out how a specific installed game can be modded, before writ
 Goal: in about five minutes, know what you're dealing with and which route to take. Write the answer down
 so every later step can rely on it.
 
+## 0. Has another agent been here?
+`um kb search "<game>"` (and the engine name). A field note in the shared knowledge base can hand you the
+working versions, the route, and the gotchas before you touch anything. See the **share-field-notes** skill.
+
 ## 1. Find it and fingerprint it
 ```bash
 um scan --list                 # Steam, Epic and Xbox installs (Windows, WSL, Linux, macOS)
 um scan "<name or folder>"     # engine, version, exes (.NET?), anti-cheat, loaders, mod folders, saves, routes
 um scan "<game>" --json        # the same, machine-readable
 ```
-`um` is on PATH through this plugin's session hook. If it's missing, use `${CLAUDE_PLUGIN_ROOT}/bin/um`, or
-`bin/um` in a clone of universal-modder.
+`um` lives at `bin/um` in the universal-modder repo (plugins and clones put it on PATH). Anywhere else:
+`uv tool install git+https://github.com/rehan-remade/universal-modder`.
 
 `um scan` reads files only. It indexes the install (bounded), sniffs PE headers, the Unity/Godot/GameMaker
 headers and the Unreal version string, maps known games to their community loader, and points to the

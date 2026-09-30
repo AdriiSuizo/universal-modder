@@ -129,7 +129,7 @@ your normal save folder.
   then grep `AI_003_Fighters`. Never commit the decompile (`um publish check` flags decompiler output).
 - Recording: capture the game window by its HWND with ffmpeg's gfxcapture (`um win record`). FNA3D's
   D3D11 `ReadBackbuffer` leaks a full frame per call, and gdigrab gives black frames. Get game-only
-  sound with a process-loopback capture (tools/win/ProcLoopback.ps1). Never block the game's main
+  sound with a process-loopback capture (um/ps1/ProcLoopback.ps1). Never block the game's main
   thread while ffmpeg stops, because gfxcapture stalls on a frozen window. Stop processes by exact PID
   (`um win kill <pid>`). From an agent's shell, `pkill -f <pattern>` also matches the shell running it
   and kills that too. `reference/InModRecorder.cs` is the in-game version, with the details.

@@ -42,7 +42,7 @@ community loader. It is a free Steam app, id 1281930. Content is written in C# a
   full-size staging texture per call, 17 GB in one take. Capture the window from outside instead: ffmpeg
   `gfxcapture=hwnd=...`.
 - FAudio talks to WASAPI directly, so `SDL_AUDIODRIVER` tricks do nothing. Use process-loopback capture of
-  the game's PID (`tools/win/ProcLoopback.ps1`).
+  the game's PID (`um/ps1/ProcLoopback.ps1`).
 - **Stopping ffmpeg:** never block the game's main thread while ffmpeg stops. gfxcapture stalls on a frozen
   window and never reads the 'q'. Send 'q', then wait off-thread.
 - Write `.mkv` while recording: it survives a kill, where an mp4 would lose its index.
@@ -100,6 +100,27 @@ community loader. It is a free Steam app, id 1281930. Content is written in C# a
   the cursor is over the game" as safe.
 - A crash leaves BugSplat's `BsSndRpt64.exe` running, and Steam then refuses to launch the game ("already
   running"). Kill it by PID before relaunching.
+
+## Minecraft inside GTA V: a passthrough mashup
+
+**Route: passthrough.** Real Minecraft Java 26.3 (a Fabric mod) runs next to GTA V story mode (a
+ScriptHookV ASI + ReShade add-on). They exchange camera, ground, input and events over a local WebSocket, and
+Minecraft's colour + depth frames over shared memory. The depth-tested composite happens in GTA's frame.
+Code: `examples/minecraft-gta5-passthrough`.
+
+**Facts that cost time** (the full list, with causes and fixes, is in
+`knowledge/games/gta-v/minecraft-passthrough.md`):
+- **Minecraft 26.3's GL backend:** it leaves the read buffer at `GL_NONE` after a depth readback. Colour
+  readbacks fail until it's restored.
+- **ReShade:** it must load through GTA's ASI loader, because the system `dxgi.dll` wins over a proxy.
+- **Blocks one frame ahead:** the script reads the camera for the frame being prepared, so re-project
+  Minecraft to the previous pose.
+- **Timing:** everything is timed with the same high-resolution clock on both sides (Java `nanoTime` = QPC);
+  `GetTickCount` judders.
+- **Guns vs weapons:** host-game guns on a guest avatar looked wrong. Guest weapons with host-game effects
+  (arrows → GTA bullets, fireworks → GTA explosions) worked.
+- **The human at the keyboard:** never focus GTA's landing page while they're typing. Keystrokes there
+  nearly started GTA Online with a modified game. ScriptHookV blocked it.
 
 ## What the 2026 AI mashup wave added
 

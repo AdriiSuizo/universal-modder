@@ -22,7 +22,7 @@ um win reg get "HKCU\Software\..."             # registry (reg set backs the key
 From Python (for longer scripts), `from um.win import Drive, shot, Recorder`, then `d = Drive("AoE2DE_s")`,
 `d.focus()`, `d.click(x, y)`, `d.key("0x0D")`.
 
-**WinDrive commands** (`tools/win/WinDrive.ps1`; stdin protocol, one reply per line). Coordinates are in
+**WinDrive commands** (`um/ps1/WinDrive.ps1`; stdin protocol, one reply per line). Coordinates are in
 the game window's **client area**.
 - Mouse: `move x y`, `click x y [right]`, `mdown`/`mup`, `drag x0 y0 x1 y1`, `rel dx dy` (FPS cameras /
   raw input), `wheel 120`.
@@ -33,6 +33,11 @@ the game window's **client area**.
   Ctrl 0x11, arrows 0x25-0x28.
 
 **Rules of the road**
+- **Never focus a game with an online mode while the human is typing.** It happened with GTA V: the agent
+  focused GTA to click Story Mode, the human's keystrokes hit GTA's landing page, and GTA warned about
+  "accessing GTA Online servers with an altered version". ScriptHookV blocked it; don't rely on that.
+  Check `idle`, ask the human to click, and launch with the anti-cheat off so online can't start. See
+  `knowledge/techniques/driving-real-games-safely.md`.
 - **Input only goes to the game.** WinDrive refuses to send while another app is in the foreground. The one
   exception is when nothing is and the cursor is over the game, which windowed games cause by dropping the
   foreground on clicks.
