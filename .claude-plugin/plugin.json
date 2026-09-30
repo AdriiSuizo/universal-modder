@@ -1,0 +1,13 @@
+{
+  "name": "universal-modder",
+  "version": "0.1.0",
+  "description": "Mod any game with Claude: engine recon, reverse engineering, fal-generated art/3D/audio, in-game testing, showcase videos. Skills + the `um` CLI + the fal MCP server.",
+  "author": {
+    "name": "Rehan",
+    "url": "https://github.com/rehan-remade"
+  },
+  "homepage": "https://github.com/rehan-remade/universal-modder",
+  "repository": "https://github.com/rehan-remade/universal-modder",
+  "license": "MIT",
+  "keywords": ["game-modding", "modding", "reverse-engineering", "tmodloader", "bepinex", "ue4ss", "fal", "sprites", "game-assets", "mcp"]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "universal-modder",
+  "description": "Skills, tools and the fal MCP for modding any game with Claude Code.",
+  "owner": {
+    "name": "Rehan",
+    "url": "https://github.com/rehan-remade"
+  },
+  "plugins": [
+    {
+      "name": "universal-modder",
+      "source": "./",
+      "description": "Mod any game with Claude: recon, reverse engineering, fal-generated assets, in-game testing and showcase videos."
+    }
+  ]
+}
