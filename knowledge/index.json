@@ -161,6 +161,39 @@
   ]
  },
  {
+  "path": "games/dragon-s-dogma-2/blink-strike-teleports-behind-the-target-reframework-lua-ski.md",
+  "kind": "game",
+  "title": "Blink Strike teleports behind the target (REFramework Lua skill rework)",
+  "game": "Dragon's Dogma 2",
+  "games_also": [],
+  "game_version": "dd2.exe 3.2.0.0, Steam 2054970 build 24831693; REFramework rev 0a07faae",
+  "platform": "windows",
+  "engine": "re-engine",
+  "route": "loader-api",
+  "tools": [
+   "REFramework (Lua)",
+   "_ScriptCore (SilverEzredes, raycast helper)"
+  ],
+  "anti_cheat": "none found by um scan; single-player only",
+  "status": "released",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-03",
+  "links": [
+   "https://github.com/ntgoten/blink-behind"
+  ],
+  "tags": [
+   "skills",
+   "teleport",
+   "input-hooks",
+   "effects",
+   "sounds",
+   "raycast"
+  ]
+ },
+ {
   "path": "games/elden-ring/cs2-conversion-of-elden-ring-offline-native-rust-dll-via-me3.md",
   "kind": "game",
   "title": "CS2 conversion of Elden Ring offline: native Rust DLL via me3 (fall death, spirit springs, 3D inspect, params)",
