@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from um import fal, publish, scan, sprite, video  # noqa: E402
+from um import backup, fal, publish, scan, sprite, video  # noqa: E402
 
 
 # --------------------------------------------------------------------------- scan
@@ -268,3 +268,16 @@ def test_pr_head_from_fork(url):
 
 def test_pr_head_same_repo():
     assert kb.pr_head("kb/a-b", None) == "kb/a-b"
+
+
+# --------------------------------------------------------------------------- backup
+
+def test_backup_handles_pre_1980_timestamps(tmp_path, monkeypatch):
+    import os
+    monkeypatch.setattr(backup, "_root", lambda name: (tmp_path / "snaps" / name).mkdir(parents=True, exist_ok=True)
+                        or tmp_path / "snaps" / name)
+    src = tmp_path / "src"
+    make(src, {"old.txt": "from 1970", "new.txt": "fresh"})
+    os.utime(src / "old.txt", (0, 0))
+    zp = backup.create(str(src), name="t")
+    assert set(backup._manifest(zp)["files"]) == {"old.txt", "new.txt"}
