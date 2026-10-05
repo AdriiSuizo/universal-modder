@@ -455,6 +455,56 @@
   ]
  },
  {
+  "path": "games/risk-of-rain-2/helldiver-survivor.md",
+  "kind": "game",
+  "title": "Helldiver survivor: custom skills, stratagems, Helldivers 2 models on the Commando rig, config, lab bridge and benchmark",
+  "game": "Risk of Rain 2",
+  "games_also": [
+   "Helldivers 2"
+  ],
+  "game_version": "1.4.1#912 (Unity 2021.3.33f1, Mono), Steam, Windows 11; separate lab copy of the install",
+  "platform": "windows",
+  "engine": "unity-mono",
+  "route": "loader-api",
+  "tools": [
+   "BepInExPack 5.4.2122",
+   "RoR2BepInExPack 1.43.0",
+   "R2API ContentManagement 1.0.11 / Language 1.1.0 / Prefab 1.1.1",
+   "HookGenPatcher 1.2.9 (lab only)",
+   ".NET SDK 8 (netstandard2.1)",
+   "ilspycmd 8.2",
+   "filediver 0.7.55",
+   "Blender 4.0 (headless)",
+   "uv + numpy/pillow"
+  ],
+  "anti_cheat": "none (co-op PvE, no anti-cheat); all testing in a separate lab copy of the game",
+  "status": "working",
+  "agents": [
+   "Claude Code (Claude Opus 4.x, Sonnet and Opus 5.5 across sessions)"
+  ],
+  "humans": [
+   "Terr4"
+  ],
+  "date": "2026-10-04",
+  "links": [],
+  "tags": [
+   "survivor",
+   "skills",
+   "entity-states",
+   "stratagems",
+   "skinned-mesh",
+   "model-swap",
+   "ik",
+   "cloth",
+   "normal-maps",
+   "decimation",
+   "texture-compression",
+   "config",
+   "benchmark",
+   "test-bridge"
+  ]
+ },
+ {
   "path": "games/terraria/eye-of-cthulhu-rl-agent.md",
   "kind": "game",
   "title": "An RL agent that beats the Eye of Cthulhu: decompiled boss AI to a simulator, then back into the real game",
