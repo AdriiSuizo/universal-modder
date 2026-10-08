@@ -126,7 +126,7 @@ All in `src/game_mp/actor_mp.cpp` unless noted.
    `_debug <entnum>` (per-frame console line).
 
 ## Verification
-- **Core:** 13 g++ tests pass (standing stays up; a 60 chest hit stumbles and recovers; a 320 hit knocks down and the
+- **Core:** 18 g++ tests pass (the shot behaviour: shock spin, spine pain, reach for wound, wounded leg, catch fall, and the 13 below) (standing stays up; a 60 chest hit stumbles and recovers; a 320 hit knocks down and the
   body gets up; walking follows the animation's root within 2 u; a hit while walking stumbles without losing the root;
   a forearm hit moves the elbow 0.29 rad alone and returns; a shin hit bends the knee; 45-unit hits every 0.1 s fall
   after 6; 25 s of random hits with no NaN; two identical runs are bit-identical; 22 us per body per 60 Hz frame; the
@@ -144,6 +144,15 @@ All in `src/game_mp/actor_mp.cpp` unless noted.
   are unaffected (the engine gates on `AI_ANIM_MOVE_CODE`, by reading, not by test).
 
 ## Gotchas
+00. **Symptom.** Behaviour offsets ("raise the arm", "bend the knee", "look at the wound") sent the body into a spin
+   or did nothing. **Cause:** they were built on bone-local axes (the bone's y as "lateral", the head's x as "forward");
+   on CoD rigs a bone's x points down the bone to its child, so those axes are near-vertical. **Fix:** derive the body's
+   forward / left from the hips' world positions and express every offset about world axes.
+0a. **Symptom.** A bullet on one segment spun it at ~100 rad/s and a capped version then could not knock the body
+   down. **Cause:** a 7-unit lever arm on a 0.16-mass segment with a sphere's inertia; a plain cap throws momentum away.
+   **Fix:** cap the segment's own velocity and spin, hand the remaining momentum to the whole body.
+0b. **Symptom.** A reaching arm made the balance controller step and oscillate. **Cause:** the capture point used the
+   whole body's velocity; a fast light arm dominates it. **Fix:** the capture point ignores the arms.
 0. **Symptom.** XPBD motors / springs did nothing (a 1 rad tracking error, the body sagged). **Cause:** compliance is
    divided by h^2 inside the solver; with inverse inertias of 0.3-70 a compliance of 0.02 is ~300x stiffer than the body
    and the correction rounds to zero. **Fix:** compliances of 1e-5..1e-3; tune against tests, not intuition.
@@ -175,6 +184,15 @@ None: the mod reuses the game's own animations.
 
 ## Cost and time
 One session, reading ~15 engine functions in full plus the mod conventions; ~250 lines of C++, ~150 of GSC, docs.
+
+## GTA IV's behaviour vocabulary (from the strings of the user's own GTAIV.exe, names only)
+Behaviours: NmRsCBUShot, BodyBalance, CatchFall, DynamicBalancer (BalanceSolve, FootPlacement, PelvisControl),
+BraceForImpact, Flinch, HeadLook, Pedal, ArmsWindmillAdaptive, BodyWrithe, BodyFoetal, HighFall, RollDownStairs,
+RollUp, FallOverWall, Grab, PointArm, SpineTwist. Shot parameters: addShockSpin, shockSpinMin/Max/DecayMult,
+spinePainMultiplier/Time/TwistMultiplier, reachForWound, timeBeforeReachForWound, reachAbsorbtionTime, armReachAmount,
+useHeadLook, headLookAtWoundMin/MaxTimer, timeBeforeCollapseWoundLeg, upperBodyFlinch, stiffnessDecayTarget/Time,
+shotRelax, bulletVel; balance: armsOutOnPush, leanAmount, maxSteps, stepHeight, balanceAbortThreshold; catch fall:
+useArmToSlowDown, orientateBodyToFallDirection, tryToAvoidHeadbuttingGround. The values are in code, not in strings.
 
 ## Open questions
 - Real falls and get-ups: BO1 has knock-down / get-up clips (the Thundergun uses them at high rounds); read their names
