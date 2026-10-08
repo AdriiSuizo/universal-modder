@@ -1,6 +1,6 @@
 ---
 kind: game
-title: 'Black Ops 1 Zombies: drunk (Euphoria-style) staggering zombies from the decompiled engine'
+title: 'Black Ops 1 Zombies: an active ragdoll over the retail animations (Euphoria-style balance, hit reactions, falls) from the decompiled engine'
 game: 'Call of Duty: Black Ops (Zombies)'
 games_also: []
 game_version: 'IW 3.0 / Black Ops engine. Steam Call of Duty: Black Ops, Zombies, run through the BO1Zombies decompiled-engine build (repo adriisuizo/bo1-zombies-decompiled, branch claude/lucid-turing-mfnut4) over a copy of the Steam install'
@@ -24,14 +24,16 @@ tags:
 - actor-ai
 - decompiled-engine
 ---
-# Black Ops 1 Zombies: drunk (Euphoria-style) staggering zombies from the decompiled engine
+# Black Ops 1 Zombies: an active ragdoll over the retail animations (Euphoria-style balance, hit reactions, falls) from the decompiled engine
 
-> A mod (`mods/euphoria` in the BO1Zombies decompiled-engine repo) that makes the zombies stagger like GTA IV's drunk
-> companions while keeping their own walk / run animations: they weave off the path, lurch sideways, lean into it,
-> catch themselves, and one stumble in four is a near-fall. Route: a ~250-line procedural layer in the engine's actor
-> move code, driven by one new script field per zombie (`self.drunk`), plus a GSC script that sets it. Written and
-> desk-checked against the engine source in a Linux session; **not yet built or run** (needs the Windows build). The
-> headless self-test it ships with (`euphoria PASS` in games_mp.log) is the oracle for whoever builds it next.
+> A mod (`mods/euphoria` in the BO1Zombies decompiled-engine repo) that gives the zombies a physical body over their
+> own walk / run / attack animations: an engine-independent active-ragdoll core (`src/euphoria`: 14 XPBD rigid
+> segments on the zombie's bones, joints with limits, motors tracking the animation, a capture-point balance controller,
+> bullet impulses per segment, falls and get-ups, tested with g++), a server authority (a per-actor inverted pendulum
+> fed by the real damage path, three free netfields to the client) and a client that writes the body back into the
+> model's skeleton the way the retail death ragdoll does. A first, cruder version (whole-entity tilt and heading
+> wander, `self.drunk`) is still there as an option. **The core is tested; the engine integration is written against the
+> source and not yet compiled or run** (Linux session, no Windows / game): the mod ships the oracles for the next agent.
 
 ## Setup
 - The repo is the engine: decompiled BO1 Zombies source, `CMakeLists.txt` (MSVC, x86, C++20, DirectX SDK June 2010 at
@@ -51,12 +53,18 @@ tags:
   the animtree fails the compile) and GSC has no way to bend an actor's heading or push it sideways without fighting
   the AI every frame. The engine has the hooks: the actor's move direction and stride are built in one function and
   its body angles in another.
-- **Rejected: real active ragdoll.** NaturalMotion's Euphoria is behaviour-driven ragdoll; the engine's ragdoll
-  (`src/ragdoll`) is a passive client-side corpse ragdoll, and live AI is a server actor. Weeks of work for a worse
-  result than a tuned procedural layer.
-- **Rejected: client bone post-processing.** Possible (`DObjCalcSkel` in `src/xanim/dobj_skel.cpp`), but needs the
-  drunk amount on the client (a netfield or a hack) and doesn't move the actor. Whole-entity pitch / roll are already
-  networked and rendered, so the server alone is enough.
+- **Second pass (the user asked for real physics by joints): an own active ragdoll, not the engine's.** The engine's
+  ragdoll (`src/ragdoll`) is a passive client-only corpse ragdoll on the game's physics with no motors; a live AI is a
+  server actor. Writing a small XPBD body (`src/euphoria`, ~650 lines, no engine headers) was cheaper than adding
+  motors and a balance layer to the retail physics, is testable with g++ on Linux, and can be shared with a standalone
+  C++ / Rust controller. The engine's ragdoll still taught the write path: `Ragdoll_DoControllers` sets bones with
+  `DObjSetSkelRotTransIndex` and writes model-space quat / trans / `transWeight = 2 / |q|^2` into `skel[bone]`, and
+  `DObjCalcSkel` computes the bones it did not set from their parents.
+- **Split authority:** the server runs a reduced capture-point pendulum per actor (deterministic, cheap) from the real
+  damage path (`Actor_Pain`), decides stumbles / falls / get-ups, moves the actor and sends the state in
+  `animState.fLeanAmount / fAimUpDown / fAimLeftRight` (unused by zombies); the client runs the full body within a
+  distance limit, biased by the server's offset and forced down / up by its state. Hit boxes on the server are the
+  animated skeleton tilted as a whole: an approximation, stated in the mod's README.
 
 ## How the game works (what we had to learn)
 All in `src/game_mp/actor_mp.cpp` unless noted.
@@ -87,9 +95,27 @@ All in `src/game_mp/actor_mp.cpp` unless noted.
 - Mods' per-zombie threads: poll `GetAiSpeciesArray("axis", "all")`, mark each with a script var, skip specials by
   `animname != "zombie"` (a special has no `animname` in its first frames, so wait 0.5 s before deciding), dogs by
   the `isdog` field, crawlers by `has_legs == false`.
+- Client controllers (`CG_DoControllers` -> `CG_Actor_DoControllers`) run BEFORE `DObjCalcSkel`, so the frame's animated
+  pose does not exist yet when a controller wants to override bones, and a bone whose animation was calculated can no
+  longer be skel-set (`DObjSetSkelRotTransIndex` returns 0 on the anim bit). Computing the animated pose into a scratch
+  `DSkel` (swap `obj->skel.mat`, zero `partBits`, `DObjCalcSkel(obj, all)`, restore) works and costs one extra skeleton
+  calculation per body per frame. `DObjCalcBaseSkel` is NOT the animated pose (it is the bind pose from `localQuats`).
+- Bullet hits on actors reach the client: `EV_BULLET_HIT` carries the target (`groundEntityNum`), the hit bone
+  (`index.bone`), the weapon and the bullet's start (`lerp.u.turret.gunAngles`); `CG_BulletHitEvent` is the hook.
+- `DObjGetBoneIndex(obj, SL_FindString(name, SCRIPTINSTANCE_SERVER), &idx, -1)` with `idx = 254` resolves a bone by
+  name across the DObj's models; 255 means "none".
+- The retail death ragdoll snapshots the DObj's bones through the controllers during its first frames
+  (`Ragdoll_SnapshotAnimOrientations` -> `CG_DObjCalcBone`), so a live-body override that keeps running on the corpse
+  entity until `pose->isRagdoll` hands the ragdoll the physical pose (plausible, unverified).
+- `ragdoll.cfg` (the retail ragdoll's bones, joints, limits) is read with `exec` from the plain filesystem
+  (`main\*.iwd`), not from a fastfile.
 
 ## Build steps
-1. In `adriisuizo/bo1-zombies-decompiled` on the branch, the change is: `src/game_sp/actor_sp_stagger.{h,cpp}` (new),
+0. Core only, no game: `tests/euphoria/run.sh` (g++) or `cl /EHsc /O2 /I src tests\euphoria\euphoria_tests.cpp src\euphoria\euphoria_body.cpp src\euphoria\euphoria_balance.cpp`.
+1. In `adriisuizo/bo1-zombies-decompiled` on the branch, the change is (second pass adds `src/euphoria/`,
+   `src/game_sp/actor_sp_euphoria.*`, `src/cgame_mp/cg_euphoria.*`, hooks in `Actor_Pain`, `CG_Actor_DoControllers`
+   and `CG_BulletHitEvent`, fields `euphoria` / `euphoriafalls` / `euphoriastate`, `Play-Euphoria.cmd`,
+   `Check-Euphoria.cmd`); the first pass was: `src/game_sp/actor_sp_stagger.{h,cpp}` (new),
    three hook lines in `src/game_mp/actor_mp.cpp` (`Actor_Stagger_Move` / `_Push` in `Path_UpdateMovementDelta`,
    `Actor_Stagger_Tilt` at the end of `Actor_UpdateAnglesAndDelta`), the `drunk` / `drunkstumbles` field rows, the
    side-table member, `cmake_files.cmake`, `mods/euphoria/`, `tools/euphoria_flags.js` and the launcher select.
@@ -100,7 +126,12 @@ All in `src/game_mp/actor_mp.cpp` unless noted.
    `_debug <entnum>` (per-frame console line).
 
 ## Verification
-- **Not run.** The session was a Linux container with the source only: no MSVC, no DirectX SDK, no game. Every engine
+- **Core:** 13 g++ tests pass (standing stays up; a 60 chest hit stumbles and recovers; a 320 hit knocks down and the
+  body gets up; walking follows the animation's root within 2 u; a hit while walking stumbles without losing the root;
+  a forearm hit moves the elbow 0.29 rad alone and returns; a shin hit bends the knee; 45-unit hits every 0.1 s fall
+  after 6; 25 s of random hits with no NaN; two identical runs are bit-identical; 22 us per body per 60 Hz frame; the
+  server pendulum: a 25 shove is absorbed, 140 falls and gets up, one 40 hit stands, six fast ones fall).
+- **Engine integration: not run.** The session was a Linux container with the source only: no MSVC, no DirectX SDK, no game. Every engine
   call in the new code was checked against its declaration in the repo's headers, and the hook points were read in
   full (the functions above), but the first Windows build is still the first compile.
 - The oracle shipped with the mod: `tools\headless.ps1 -Zombies -Commands "+set fs_game mods/euphoria +set fs_mods
@@ -113,6 +144,13 @@ All in `src/game_mp/actor_mp.cpp` unless noted.
   are unaffected (the engine gates on `AI_ANIM_MOVE_CODE`, by reading, not by test).
 
 ## Gotchas
+0. **Symptom.** XPBD motors / springs did nothing (a 1 rad tracking error, the body sagged). **Cause:** compliance is
+   divided by h^2 inside the solver; with inverse inertias of 0.3-70 a compliance of 0.02 is ~300x stiffer than the body
+   and the correction rounds to zero. **Fix:** compliances of 1e-5..1e-3; tune against tests, not intuition.
+0b. **Symptom.** A walking body "stumbles" forever with no hit. **Cause:** the capture point used the body's world
+   velocity, which includes the animation's root motion. **Fix:** judge balance relative to the animated pelvis velocity.
+0c. **Symptom.** Rapid hits never added up to a fall. **Cause:** the animation's hold on the pelvis (authority) restored
+   balance between hits. **Fix:** a balance budget each hit spends (recovering over ~1.5 s) that scales the authority.
 1. **Symptom.** A `%ai_zombie_...` animation name in a mod script that is not in the map's animtree. **Cause:** `%name`
    resolves at compile time against `#using_animtree`; the retail animtree is in the fastfile, not the repo. **Fix:**
    don't guess names; drive what you can from the engine (this mod), or read the names from the fastfile's scripts

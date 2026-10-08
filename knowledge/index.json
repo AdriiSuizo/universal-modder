@@ -405,7 +405,7 @@
  {
   "path": "games/call-of-duty-black-ops-zombies/black-ops-1-zombies-drunk-euphoria-style-staggering-zombies-.md",
   "kind": "game",
-  "title": "Black Ops 1 Zombies: drunk (Euphoria-style) staggering zombies from the decompiled engine",
+  "title": "Black Ops 1 Zombies: an active ragdoll over the retail animations (Euphoria-style balance, hit reactions, falls) from the decompiled engine",
   "game": "Call of Duty: Black Ops (Zombies)",
   "games_also": [],
   "game_version": "IW 3.0 / Black Ops engine. Steam Call of Duty: Black Ops, Zombies, run through the BO1Zombies decompiled-engine build (repo adriisuizo/bo1-zombies-decompiled, branch claude/lucid-turing-mfnut4) over a copy of the Steam install",
