@@ -403,6 +403,37 @@
   ]
  },
  {
+  "path": "games/call-of-duty-black-ops-zombies/black-ops-1-zombies-drunk-euphoria-style-staggering-zombies-.md",
+  "kind": "game",
+  "title": "Black Ops 1 Zombies: drunk (Euphoria-style) staggering zombies from the decompiled engine",
+  "game": "Call of Duty: Black Ops (Zombies)",
+  "games_also": [],
+  "game_version": "IW 3.0 / Black Ops engine. Steam Call of Duty: Black Ops, Zombies, run through the BO1Zombies decompiled-engine build (repo adriisuizo/bo1-zombies-decompiled, branch claude/lucid-turing-mfnut4) over a copy of the Steam install",
+  "platform": "windows",
+  "engine": "native",
+  "route": "decomp-recomp",
+  "tools": [
+   "CMake + MSVC x86 (Visual Studio 2019/2022), DirectX SDK June 2010",
+   "the repo's tools/headless.ps1 (windowless runs, log checks)"
+  ],
+  "anti_cheat": "none in this path (the build runs its own listen server from a copy of the install; the Steam client exe is never used)",
+  "status": "in-progress",
+  "agents": [
+   "Claude Code (Claude Fable 5.1)"
+  ],
+  "humans": [],
+  "date": "2026-10-08",
+  "links": [
+   "https://github.com/adriisuizo/bo1-zombies-decompiled"
+  ],
+  "tags": [
+   "zombies",
+   "procedural-animation",
+   "actor-ai",
+   "decompiled-engine"
+  ]
+ },
+ {
   "path": "games/darkest-dungeon/data-mod-randomizer.md",
   "kind": "game",
   "title": "A seeded randomizer (trinkets, heroes, monsters, curios, quirks, quests) as a Darkest Dungeon data mod",
